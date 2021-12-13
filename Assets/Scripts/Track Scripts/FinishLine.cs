@@ -28,6 +28,15 @@ public class FinishLine : MonoBehaviour
         {
             TrackProgress rootTracker = root.GetComponentInChildren<TrackProgress>();
 
+            if (linkedFinishLines != null)
+            {
+                foreach (GameObject finishLine in linkedFinishLines)
+                {
+                    rootTracker.PassedCheckpoint(finishLine);
+                }
+            }
+            rootTracker.PassedCheckpoint(gameObject);
+
             if (rootTracker.CheckCompleteProgress() == true)
             {
                 if (rootTracker.GetLapsLeft() <= 0)

@@ -14,11 +14,11 @@ public class Checkpoint : MonoBehaviour
             {
                 foreach(GameObject checkpoint in linkedCheckpoints)
                 {
-                    other.transform.root.GetComponent<TrackProgress>().PassedCheckpoint(checkpoint);
+                    other.transform.root.GetComponentInChildren<TrackProgress>().PassedCheckpoint(checkpoint);
                 }
             }
-            
-            other.transform.root.GetComponent<TrackProgress>().PassedCheckpoint(gameObject);
+
+            other.transform.root.GetComponentInChildren<TrackProgress>().PassedCheckpoint(gameObject);
         }
     }
 }

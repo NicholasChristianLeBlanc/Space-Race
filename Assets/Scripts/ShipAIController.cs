@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(LeftRightTest))]
+[RequireComponent(typeof(UnityStandardAssets.Utility.WaypointProgressTracker))]
+
 public class ShipAIController : ShipController
 {
     // taken from AeroplaneAiControl.cs in the standard asset package
@@ -12,24 +15,26 @@ public class ShipAIController : ShipController
     [SerializeField] private float m_ThrustWanderSpeed = 0.11f;                     // The speed at which the ship will wander
     [SerializeField] private Transform m_Target;                                    // the target to fly towards
 
-    private int thrustInput = 0;
-    private int pitchInput = 0;
-    private int yawInput = 0;
-    private int rollInput = 0;
+    private LeftRightTest lrTest;
 
     private void Awake()
     {
         rigidbody = gameObject.GetComponent<Rigidbody>();
+
+        lrTest = gameObject.GetComponent<LeftRightTest>();
     }
 
     // Update is called once per frame
-    private void FixedUpdate()
+    private void Update()
     {
         if (m_Target != null)
         {
             Vector3 relativePos = m_Target.position - transform.position;
-            Quaternion lookAtRotation = Quaternion.LookRotation(relativePos, transform.up);
-            Quaternion currentRotation = transform.rotation;
+
+            ManageYaw(lrTest.AngleDir(transform.forward, m_Target.position - transform.position, transform.up) * Vector3.Angle(m_Target.position - transform.position, transform.forward) / 15);
+            ManagePitch(lrTest.AngleDir(transform.forward, -m_Target.position + transform.position, transform.right) * Vector3.Angle(m_Target.position - transform.position, transform.forward) / 15);
+
+
 
             //if (CalcShortestRot(currentRotation.y, lookAtRotation.y) > 0)
             //{
@@ -51,8 +56,6 @@ public class ShipAIController : ShipController
 
             //    Debug.Log(currentRotation.y);
             //}
-
-
         }
         else
         {
@@ -60,9 +63,7 @@ public class ShipAIController : ShipController
         }
     }
 
-    // Call CalcShortestRot and check its return value.
-    // If CalcShortestRot returns a positive value, then this function
-    // will return true for left. Else, false for right.
+    // Call CalcShortestRot and check its return value. If CalcShortestRot returns a positive value, then this function will return true for left. Else, false for right.
     bool CalcShortestRotDirection(float from, float to)
     {
         // If the value is positive, return true (left).
@@ -73,8 +74,7 @@ public class ShipAIController : ShipController
         return false; // right
     }
 
-    // If the return value is positive, then rotate to the left. Else,
-    // rotate to the right.
+    // If the return value is positive, then rotate to the left. Else, rotate to the right.
     float CalcShortestRot(float from, float to)
     {
         // If from or to is a negative, we have to recalculate them.

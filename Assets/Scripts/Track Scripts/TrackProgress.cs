@@ -26,10 +26,8 @@ public class TrackProgress : MonoBehaviour
         {
             if (playerCharacter != null)
             {
-                playerCharacter.transform.position = spawnpoint.position;
+                playerCharacter.transform.position = spawnpoint.position - spawnpoint.forward * 10;
                 playerCharacter.transform.rotation = spawnpoint.rotation;
-
-                //gameObject.GetComponentInChildren<Rigidbody>().velocity = Vector3.zero;
                 
                 if (gameObject.TryGetComponent<ShipPlayerController>(out ShipPlayerController playerController))
                 {
@@ -77,14 +75,59 @@ public class TrackProgress : MonoBehaviour
             if (checkpointFound)
             {
                 //Debug.Log("Index: " + index + " | checkpoint length: " + activeCheckpoints.Length);
-                activeCheckpoints[index] = true;
-                spawnpoint = other.transform;
+
+                if (activeCheckpoints[index] == true)
+                {
+                    Debug.Log("Checkpoint already passed");
+                }
+                else
+                {
+                    activeCheckpoints[index] = true;
+                    spawnpoint = other.transform;
+                }
             }
             else
             {
                 Debug.Log("checkpoint not found");
             }
         }
+    }
+
+    public int GetPassedCheckpoints()
+    {
+        int i = 0;
+        foreach(bool checkpointActive in activeCheckpoints)
+        {
+            if (checkpointActive == true)
+            {
+                i++;
+            }
+        }
+
+        return i;
+    }
+
+    public float GetNearestCheckpointDistance()
+    {
+        int index = 0;
+        float distance = float.MaxValue;
+
+        foreach (GameObject checkpoint in checkpoints)
+        {
+            if (activeCheckpoints[index] != true)
+            {
+                float checkDistance = Vector3.Distance(checkpoint.transform.position, transform.position);
+
+                if (checkDistance < distance)
+                {
+                    distance = checkDistance;
+                }
+            }
+
+            index++;
+        }
+
+        return distance;
     }
 
     public void SetLaps(int newLaps)
@@ -113,6 +156,11 @@ public class TrackProgress : MonoBehaviour
         for (int i = 0; i < activeCheckpoints.Length; i++)
         {
             activeCheckpoints[i] = false;
+        }
+
+        if (gameObject.TryGetComponent<ShipPlayerController>(out ShipPlayerController playerController))
+        {
+            playerController.FinishLap();
         }
     }
 

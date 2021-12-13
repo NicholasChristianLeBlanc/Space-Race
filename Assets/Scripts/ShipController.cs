@@ -4,26 +4,35 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 
+[RequireComponent(typeof(HandlePlayerFinished))]
+[RequireComponent(typeof(TrackProgress))]
+
 public class ShipController : MonoBehaviour
 {
     // Forces
-    [SerializeField] [Range(0, 100)] private float thrustForce = 10;
-    [SerializeField] [Range(0, 100)] private float reverseThrustForce = 10;
-    [SerializeField] [Range(0, 500)] private float pitchForce = 20;
-    [SerializeField] [Range(0, 500)] private float yawForce = 20;
-    [SerializeField] [Range(0, 100)] private float rollForce = 20;
+    [SerializeField] [Range(0, 50)] private float thrustForce = 25;
+    [SerializeField] [Range(0, 50)] private float reverseThrustForce = 25;
+    [SerializeField] [Range(0, 100)] private float brakeForce = 50;
+    [SerializeField] [Range(0, 50)] private float horizontalThrustForce = 20;
+    [SerializeField] [Range(0, 100)] private float pitchForce = 75;
+    [SerializeField] [Range(0, 100)] private float yawForce = 75;
+    [SerializeField] [Range(0, 100)] private float rollForce = 7;
 
     // Max Speeds
-    [SerializeField] [Range(0, 5000)] protected float maxSpeed = 2500;
-    [SerializeField] [Range(0, 5000)] protected float maxReverseSpeed = 1500;
-    [SerializeField] [Range(0, 5000)] private float maxPitchSpeed = 200;
-    [SerializeField] [Range(0, 5000)] private float maxYawSpeed = 200;
-    [SerializeField] [Range(0, 5000)] private float maxRollSpeed = 200;
+    [SerializeField] [Range(0, 200)] protected float maxSpeed = 45;
+    [SerializeField] [Range(0, 200)] protected float maxReverseSpeed = 25;
+    [SerializeField] [Range(0, 200)] protected float maxHorizontalSpeed = 25;
+    [SerializeField] [Range(0, 200)] private float maxPitchSpeed = 50;
+    [SerializeField] [Range(0, 200)] private float maxYawSpeed = 50;
+    [SerializeField] [Range(0, 200)] private float maxRollSpeed = 15;
+
+    [SerializeField] private bool forwardDrag = false;
 
     protected Rigidbody rigidbody;
-    protected float forwardSpeed, pitchSpeed, yawSpeed, rollSpeed;
+    protected float forwardSpeed, horizontalSpeed, pitchSpeed, yawSpeed, rollSpeed;
 
     Vector3 angularVelocity = new Vector3(0, 0, 0);
+    Vector3 velocity = new Vector3(0, 0, 0);
 
     private void Awake()
     {
@@ -38,7 +47,7 @@ public class ShipController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (forwardSpeed > 0 || forwardSpeed < 0)
+        if ((forwardSpeed > 0 || forwardSpeed < 0) && forwardDrag)
         {
             if (rigidbody.drag > 0)
             {
@@ -50,7 +59,22 @@ public class ShipController : MonoBehaviour
                 forwardSpeed = 0;
             }
         }
-        rigidbody.velocity = transform.forward * forwardSpeed;
+
+        if (horizontalSpeed > 0 || horizontalSpeed < 0)
+        {
+            if (rigidbody.drag > 0)
+            {
+                horizontalSpeed *= rigidbody.drag;
+            }
+
+            if (horizontalSpeed <= 0.007 && horizontalSpeed >= -0.007)
+            {
+                horizontalSpeed = 0;
+            }
+        }
+        velocity.z = forwardSpeed;
+        velocity.x = horizontalSpeed;
+        rigidbody.velocity = transform.TransformDirection(velocity);
         
         if (rollSpeed > 0 || rollSpeed < 0)
         {
@@ -67,6 +91,96 @@ public class ShipController : MonoBehaviour
 
         angularVelocity = new Vector3(-pitchSpeed, yawSpeed, rollSpeed);
         rigidbody.angularVelocity = transform.TransformDirection(angularVelocity);
+    }
+
+    // controls the thrust being applied to to forward and backward momentum 
+    protected void ForwardThrust()
+    {
+        if (forwardSpeed < 0)
+        {
+            forwardSpeed += Time.deltaTime * thrustForce * 2;
+        }
+        else
+        {
+            forwardSpeed += Time.deltaTime * thrustForce;
+        }
+
+        if (forwardSpeed > maxSpeed)
+        {
+            forwardSpeed = maxSpeed;
+        }
+
+        //rigidbody.AddForce(transform.forward * thrustForce);
+    }
+    protected void ReverseThrust()
+    {
+        if (forwardSpeed > 0)
+        {
+            forwardSpeed -= Time.deltaTime * reverseThrustForce * 2;
+        }
+        else
+        {
+            forwardSpeed -= Time.deltaTime * reverseThrustForce;
+        }
+
+        if (forwardSpeed < -maxReverseSpeed)
+        {
+            forwardSpeed = -maxReverseSpeed;
+        }
+    }
+    protected void Brake()
+    {
+        if (forwardSpeed == 0)
+        {
+            forwardSpeed = 0;
+        }
+        else if (forwardSpeed > 0)
+        {
+            forwardSpeed -= brakeForce * Time.deltaTime;
+        }
+        else if (forwardSpeed < 0)
+        {
+            forwardSpeed += brakeForce * Time.deltaTime;
+        }
+
+        if (forwardSpeed <= 0.007 && forwardSpeed >= -0.007)
+        {
+            forwardSpeed = 0;
+        }
+    }
+
+    // controlls sideways thrust
+    protected void LeftThrust()
+    {
+        if (horizontalSpeed > 0)
+        {
+            horizontalSpeed -= Time.deltaTime * horizontalThrustForce * 2;
+        }
+        else
+        {
+            horizontalSpeed -= Time.deltaTime * horizontalThrustForce;
+        }
+
+        if (horizontalSpeed < -maxHorizontalSpeed)
+        {
+            horizontalSpeed = -maxHorizontalSpeed;
+        }
+    }
+    protected void RightThrust()
+    {
+        if (horizontalSpeed < 0)
+        {
+            horizontalSpeed += Time.deltaTime * horizontalThrustForce * 2;
+        }
+        else
+        {
+            horizontalSpeed += Time.deltaTime * horizontalThrustForce;
+        }
+
+        if (horizontalSpeed > maxHorizontalSpeed)
+        {
+            horizontalSpeed = maxHorizontalSpeed;
+        }
     }
 
     // controlls how fast the ship turns vertically
@@ -102,14 +216,7 @@ public class ShipController : MonoBehaviour
     // controls the roll angle of the ship / where the wings are pointing vertically (left means left wing is pointing down, right means right wing is pointing down)
     protected void RollLeft()
     {
-        if (rollSpeed < 0)
-        {
-            rollSpeed += Time.fixedDeltaTime * rollForce * 2;
-        }
-        else
-        {
-            rollSpeed += Time.fixedDeltaTime * rollForce;
-        }
+        rollSpeed += Time.deltaTime * rollForce;
 
         if (rollSpeed > maxRollSpeed)
         {
@@ -118,14 +225,7 @@ public class ShipController : MonoBehaviour
     }
     protected void RollRight()
     {
-        if (rollSpeed > 0)
-        {
-            rollSpeed -= Time.fixedDeltaTime * rollForce * 2;
-        }
-        else
-        {
-            rollSpeed -= Time.fixedDeltaTime * rollForce;
-        }
+        rollSpeed -= Time.deltaTime * rollForce;
 
         if (rollSpeed < -maxRollSpeed)
         {
@@ -133,41 +233,7 @@ public class ShipController : MonoBehaviour
         }
     }
 
-    // controls the thrust being applied to to forward and backward momentum 
-    protected void ForwardThrust()
-    {
-        if (forwardSpeed < 0)
-        {
-            forwardSpeed += Time.fixedDeltaTime * thrustForce * 2;
-        }
-        else
-        {
-            forwardSpeed += Time.fixedDeltaTime * thrustForce;
-        }
-
-        if (forwardSpeed > maxSpeed)
-        {
-            forwardSpeed = maxSpeed;
-        }
-
-        //rigidbody.AddForce(transform.forward * thrustForce);
-    }
-    protected void ReverseThrust()
-    {
-        if (forwardSpeed > 0)
-        {
-            forwardSpeed -= Time.fixedDeltaTime * reverseThrustForce * 2;
-        }
-        else
-        {
-            forwardSpeed -= Time.fixedDeltaTime * reverseThrustForce;
-        }
-
-        if (forwardSpeed < -maxReverseSpeed)
-        {
-            forwardSpeed = -maxReverseSpeed;
-        }
-    }
+    
 
     public float GetRollSpeed()
     {
