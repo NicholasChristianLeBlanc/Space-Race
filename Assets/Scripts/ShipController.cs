@@ -3,13 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(BoxCollider))]
 
 [RequireComponent(typeof(HandlePlayerFinished))]
 [RequireComponent(typeof(TrackProgress))]
 
 public class ShipController : MonoBehaviour
 {
+    // Components
+    [Header("Components")]
+    [SerializeField] private BoxCollider undersideCollider;
+
     // Forces
+    [Header("Forces")]
     [SerializeField] [Range(0, 50)] private float thrustForce = 25;
     [SerializeField] [Range(0, 50)] private float reverseThrustForce = 25;
     [SerializeField] [Range(0, 100)] private float brakeForce = 50;
@@ -19,6 +25,7 @@ public class ShipController : MonoBehaviour
     [SerializeField] [Range(0, 100)] private float rollForce = 7;
 
     // Max Speeds
+    [Header("Max Speeds")]
     [SerializeField] [Range(0, 200)] protected float maxSpeed = 45;
     [SerializeField] [Range(0, 200)] protected float maxReverseSpeed = 25;
     [SerializeField] [Range(0, 200)] protected float maxHorizontalSpeed = 25;
@@ -91,6 +98,11 @@ public class ShipController : MonoBehaviour
 
         angularVelocity = new Vector3(-pitchSpeed, yawSpeed, rollSpeed);
         rigidbody.angularVelocity = transform.TransformDirection(angularVelocity);
+    }
+
+    private void Update()
+    {
+         
     }
 
     // controls the thrust being applied to to forward and backward momentum 
@@ -232,8 +244,6 @@ public class ShipController : MonoBehaviour
             rollSpeed = -maxRollSpeed;
         }
     }
-
-    
 
     public float GetRollSpeed()
     {

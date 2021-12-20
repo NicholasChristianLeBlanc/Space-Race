@@ -79,6 +79,7 @@ public class PauseMenuController : MonoBehaviour
 
     private void Start()
     {
+        background.enabled = true;
         pausedText.enabled = false;
         resume.gameObject.SetActive(false);
 

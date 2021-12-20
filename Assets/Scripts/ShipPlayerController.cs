@@ -6,9 +6,11 @@ using TMPro;
 
 public class ShipPlayerController : ShipController
 {
+    [Header("Deadzones")]
     [SerializeField] [Range(0, 2000)] private int mouseHorizontalDeadzone = 10;
     [SerializeField] [Range(0, 2000)] private int mouseVerticalDeadzone = 10;
 
+    [Header("UI Components")]
     [SerializeField] private PauseMenuController pauseMenu;
 
     [SerializeField] private Transform mouseSprite;
