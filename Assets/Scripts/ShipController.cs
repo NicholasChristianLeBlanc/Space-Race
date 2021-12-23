@@ -13,9 +13,12 @@ public class ShipController : MonoBehaviour
     // Components
     [Header("Components")]
     [SerializeField] private BoxCollider undersideCollider;
+    [SerializeField] private MeshCollider meshCollider;
+    protected Rigidbody rigidbody;
 
     // Forces
     [Header("Forces")]
+    [SerializeField] private bool forwardDrag = false;
     [SerializeField] [Range(0, 50)] private float thrustForce = 25;
     [SerializeField] [Range(0, 50)] private float reverseThrustForce = 25;
     [SerializeField] [Range(0, 100)] private float brakeForce = 50;
@@ -33,9 +36,7 @@ public class ShipController : MonoBehaviour
     [SerializeField] [Range(0, 200)] private float maxYawSpeed = 50;
     [SerializeField] [Range(0, 200)] private float maxRollSpeed = 15;
 
-    [SerializeField] private bool forwardDrag = false;
-
-    protected Rigidbody rigidbody;
+    // Speeds
     protected float forwardSpeed, horizontalSpeed, pitchSpeed, yawSpeed, rollSpeed;
 
     Vector3 angularVelocity = new Vector3(0, 0, 0);
@@ -98,11 +99,6 @@ public class ShipController : MonoBehaviour
 
         angularVelocity = new Vector3(-pitchSpeed, yawSpeed, rollSpeed);
         rigidbody.angularVelocity = transform.TransformDirection(angularVelocity);
-    }
-
-    private void Update()
-    {
-         
     }
 
     // controls the thrust being applied to to forward and backward momentum 
