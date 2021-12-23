@@ -33,9 +33,11 @@ public class PauseMenuController : MonoBehaviour
     {
         if (showInEditor)
         {
+            background.enabled = true;
+
             if (settingsOpened)
             {
-                settingsMenu.enabled = true;
+                settingsMenu.gameObject.SetActive(true);
 
                 pausedText.enabled = false;
                 resume.gameObject.SetActive(false);
@@ -46,13 +48,12 @@ public class PauseMenuController : MonoBehaviour
             }
             else
             {
-                background.enabled = true;
                 pausedText.enabled = true;
                 resume.gameObject.SetActive(true);
 
                 settings.gameObject.SetActive(true);
-                settingsMenu.enabled = false;
-                 
+                settingsMenu.gameObject.SetActive(false);
+
                 quitButton.gameObject.SetActive(true);
                 
                 if (quitOpened)
@@ -71,6 +72,7 @@ public class PauseMenuController : MonoBehaviour
             pausedText.enabled = false;
             resume.gameObject.SetActive(false);
             settings.gameObject.SetActive(false);
+            settingsMenu.gameObject.SetActive(false);
             quitButton.gameObject.SetActive(false);
 
             quitBox.enabled = false;

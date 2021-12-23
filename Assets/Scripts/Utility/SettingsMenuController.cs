@@ -59,12 +59,6 @@ public class SettingsMenuController : MonoBehaviour
         returnButton.onClick.AddListener(ManageReturn);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void SetBackgroundVisible(bool visible)
     {
         backgroundVisible = visible;
@@ -78,6 +72,12 @@ public class SettingsMenuController : MonoBehaviour
             {
                 backgroundImage.enabled = true;
             }
+            else
+            {
+                backgroundImage.enabled = false;
+            }
+
+
         }
         else
         {
@@ -106,6 +106,8 @@ public class SettingsMenuController : MonoBehaviour
 
             PlayerPrefs.Save();
         }
+
+        ManageDeleteBox();
     }
 
     private void ManageReturn()
@@ -114,6 +116,5 @@ public class SettingsMenuController : MonoBehaviour
         {
             menuController.ManageSettings();
         }
-
     }
 }

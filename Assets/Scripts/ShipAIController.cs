@@ -29,11 +29,24 @@ public class ShipAIController : ShipController
     {
         if (m_Target != null)
         {
-            Vector3 relativePos = m_Target.position - transform.position;
-
             ManageYaw(lrTest.AngleDir(transform.forward, m_Target.position - transform.position, transform.up) * Vector3.Angle(m_Target.position - transform.position, transform.forward) / 15);
             ManagePitch(lrTest.AngleDir(transform.forward, -m_Target.position + transform.position, transform.right) * Vector3.Angle(m_Target.position - transform.position, transform.forward) / 15);
 
+            if (Vector3.Angle(m_Target.position - transform.position, transform.forward) >= 30)
+            {
+                if (forwardSpeed > (maxSpeed / 2) + 7)
+                {
+                    Brake();
+                }
+                else if (forwardSpeed < (maxSpeed / 2) - 7)
+                {
+                    ForwardThrust();
+                }
+            }
+            else
+            {
+                ForwardThrust();
+            }
 
 
             //if (CalcShortestRot(currentRotation.y, lookAtRotation.y) > 0)
